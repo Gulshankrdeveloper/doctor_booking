@@ -322,3 +322,67 @@ h1, h2, h3, h4 {
 .badge-success { background: rgba(16, 185, 129, 0.2); color: #34d399; }
 .badge-warning { background: rgba(245, 158, 11, 0.2); color: #fbbf24; }
 .badge-info { background: rgba(59, 130, 246, 0.2); color: #60a5fa; }
+
+/* Responsive Design Overrides */
+@media (max-width: 768px) {
+  /* Typography */
+  h1 { font-size: 2.5rem !important; }
+  h2 { font-size: 1.75rem !important; }
+  
+  /* Navbar */
+  .nav-links { display: none; }
+  .navbar { flex-wrap: wrap; gap: 1rem; justify-content: space-between; }
+  
+  /* Convert explicit grid inline styles to column layouts */
+  main[style*="grid-template-columns: 1fr 1fr"],
+  div[style*="grid-template-columns: 2fr 1fr"],
+  div[style*="grid-template-columns: 300px 1fr"],
+  div[style*="grid-template-columns: repeat(3, 1fr)"],
+  div[style*="grid-template-columns: 1fr 1fr"] {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 1.5rem !important;
+  }
+  
+  /* Convert explicitly flex'd inline forms to vertical */
+  form[style*="display: flex; gap: 1rem; flex-wrap: wrap;"] {
+    flex-direction: column !important;
+    align-items: stretch !important;
+  }
+  
+  .input-glass { width: 100% !important; }
+
+  /* Dashboard Adjustments */
+  .dashboard-layout {
+    display: flex !important;
+    flex-direction: column !important;
+  }
+  
+  .sidebar {
+    border-right: none;
+    border-bottom: var(--border-glass);
+    padding: 1rem;
+    overflow-x: auto;
+  }
+  
+  .sidebar nav {
+    flex-direction: row !important;
+    min-width: max-content;
+    gap: 0.5rem !important;
+  }
+  
+  .sidebar nav button, .sidebar nav a {
+    padding: 0.5rem 1rem !important;
+    border-left: none !important;
+    border-bottom: 3px solid transparent;
+  }
+  
+  .main-content {
+    padding: 1rem;
+  }
+  
+  /* Fix tight header margins */
+  .hero-content {
+    padding-top: 1rem;
+  }
+}
