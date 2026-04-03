@@ -164,7 +164,9 @@ export const renderPatientDashboard = () => {
         const d = docSnap.data();
         htmlBlock += `
           <div class="glass-card" style="display: flex; gap: 1.5rem; border-color: rgba(59, 130, 246, 0.4);">
-             <div style="width: 90px; height: 90px; background: rgba(255,255,255,0.05); border-radius: var(--radius-sm); display: flex; align-items: center; justify-content: center; font-size: 2.5rem;">👩‍⚕️</div>
+             <div style="width: 90px; height: 90px; border-radius: var(--radius-sm); overflow: hidden; border: 2px solid rgba(255,255,255,0.1); flex-shrink: 0; box-shadow: 0 4px 15px rgba(0,0,0,0.3);">
+                <img src="/doc${((d.name || 'a').length % 3) + 1}.png" style="width: 100%; height: 100%; object-fit: cover; object-position: top;" alt="Doctor Profile">
+             </div>
              <div style="flex: 1;">
                  <div style="display: flex; justify-content: space-between; align-items: flex-start;">
                      <div>
@@ -240,7 +242,9 @@ const renderPatientContent = () => {
             <div style="position: absolute; top: 0; left: 0; width: 4px; height: 100%; background: var(--primary);"></div>
             <div style="display: flex; justify-content: space-between; align-items: flex-start;">
               <div style="display: flex; gap: 1rem;">
-                <img src="https://i.pravatar.cc/150?u=1" alt="Dr" style="width: 50px; height: 50px; border-radius: 10px; object-fit: cover;" />
+                   <div style="width: 50px; height: 50px; border-radius: 10px; overflow: hidden; border: 2px solid rgba(255,255,255,0.2); box-shadow: 0 0 15px rgba(59,130,246,0.3); flex-shrink: 0;">
+                      <img src="/doc3.png" style="width: 100%; height: 100%; object-fit: cover; object-position: top;" alt="Doctor Portrait">
+                   </div>
                 <div>
                   <h4 style="font-size: 1.1rem; margin-bottom: 0.25rem;">Dr. Sarah Jenkins</h4>
                   <p style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 0.5rem;"><span class="badge badge-info" style="margin-right: 0.5rem; font-size: 0.7rem;">Online Video</span> Cardiologist</p>
@@ -257,9 +261,11 @@ const renderPatientContent = () => {
           <div class="glass-card" style="position: relative; overflow: hidden; padding-bottom: 1rem;">
             <div style="position: absolute; top: 0; left: 0; width: 4px; height: 100%; background: var(--accent);"></div>
             <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem;">
-              <div style="display: flex; gap: 1rem;">
-                <div style="width: 50px; height: 50px; border-radius: 10px; background: rgba(255,255,255,0.05); display: flex; align-items: center; justify-content: center; font-weight: bold;">EM</div>
-                <div>
+               <div style="display: flex; gap: 1rem;">
+                   <div style="width: 50px; height: 50px; border-radius: 10px; overflow: hidden; border: 2px solid rgba(255,255,255,0.2); box-shadow: 0 0 15px rgba(59,130,246,0.3); flex-shrink: 0;">
+                      <img src="/doc2.png" style="width: 100%; height: 100%; object-fit: cover; object-position: top;" alt="Doctor Portrait">
+                   </div>
+                   <div>
                   <h4 style="font-size: 1.1rem; margin-bottom: 0.25rem;">Dr. Emily Chen</h4>
                   <p style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 0.5rem;"><span class="badge badge-success" style="margin-right: 0.5rem; font-size: 0.7rem;">In-Person Clinic</span> Dermatologist</p>
                   <div style="display: flex; gap: 1rem; font-size: 0.85rem; margin-bottom: 0.5rem;">
