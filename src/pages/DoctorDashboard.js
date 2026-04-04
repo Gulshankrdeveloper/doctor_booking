@@ -1,5 +1,5 @@
 import { auth, db } from '../firebase.js';
-import { collection, getDocs, query, where, doc, getDoc } from 'firebase/firestore';
+import { collection, getDocs, query, where, doc, getDoc, onSnapshot } from 'firebase/firestore';
 
 export const renderDoctorDashboard = () => {
   if (!window.currentDoctorTab) window.currentDoctorTab = 'schedule';
@@ -76,44 +76,51 @@ export const renderDoctorDashboard = () => {
 const renderDoctorContent = () => {
   const tab = window.currentDoctorTab;
 
-  window.fetchDoctorAppointments = async () => {
+  window.fetchDoctorAppointments = () => {
      const container = document.getElementById('doc-schedule-container');
      if (!container) return;
      
+     // Prevent multiple duplicate listeners when swapping tabs
+     if (window.unsubAppointments) {
+         window.unsubAppointments();
+     }
+
      try {
-       // Ideally we filter by Doctor UID, but for this demo scale, we fetch all appointments 
-       // where doctorName was recorded, or just all of them to show the real-time link.
-       const qSnap = await getDocs(collection(db, 'appointments'));
-       if (qSnap.empty) {
-           container.innerHTML = '<p style="color: var(--text-secondary);">No appointments scheduled yet.</p>';
-           return;
-       }
-       
-       let html = '';
-       qSnap.forEach(doc => {
-          const d = doc.data();
-          const badgeColor = d.location === 'online' ? 'badge-info' : 'badge-success';
-          const format = d.location === 'online' ? 'Online Video' : 'In-Person Clinic';
-          
-          html += `
-              <div class="glass-card fade-in" style="display: flex; align-items: center; gap: 1.5rem; position: relative; overflow: hidden; border-color: rgba(255,255,255,0.1);">
-                 <div style="position: absolute; top: 0; left: 0; width: 4px; height: 100%; background: var(--primary);"></div>
-                 <div style="font-weight: 700; width: 80px; color: var(--primary); text-align: right;">${d.time}</div>
-                 <div style="width: 2px; height: 40px; background: rgba(255,255,255,0.1);"></div>
-                 <div style="flex: 1;">
-                    <h4 style="margin-bottom: 0.2rem; display: flex; align-items: center; gap: 0.5rem;">
-                      ${d.reason}
-                      <span class="badge ${badgeColor}" style="font-size: 0.65rem; font-weight: 500; padding: 0.15rem 0.5rem;">${format}</span>
-                    </h4>
-                    <p style="font-size: 0.85rem; color: var(--text-secondary); margin: 0;">Date: ${d.date} • Booked for: ${d.doctorName}</p>
-                 </div>
-                 <a href="/room" data-link class="btn btn-primary" style="padding: 0.5rem 1rem; font-size: 0.85rem;">Start Call</a>
-              </div>
-          `;
+       // Live real-time connection to Firestore
+       window.unsubAppointments = onSnapshot(collection(db, 'appointments'), (qSnap) => {
+           if (qSnap.empty) {
+               container.innerHTML = '<p style="color: var(--text-secondary);">No appointments scheduled yet.</p>';
+               return;
+           }
+           
+           let html = '';
+           qSnap.forEach(doc => {
+              const d = doc.data();
+              const badgeColor = d.location === 'online' ? 'badge-info' : 'badge-success';
+              const format = d.location === 'online' ? 'Online Video' : 'In-Person Clinic';
+              
+              html += `
+                  <div class="glass-card fade-in" style="display: flex; align-items: center; gap: 1.5rem; position: relative; overflow: hidden; border-color: rgba(255,255,255,0.1);">
+                     <div style="position: absolute; top: 0; left: 0; width: 4px; height: 100%; background: var(--primary);"></div>
+                     <div style="font-weight: 700; width: 80px; color: var(--primary); text-align: right;">${d.time}</div>
+                     <div style="width: 2px; height: 40px; background: rgba(255,255,255,0.1);"></div>
+                     <div style="flex: 1;">
+                        <h4 style="margin-bottom: 0.2rem; display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
+                          ${d.reason}
+                          <span class="badge ${badgeColor}" style="font-size: 0.65rem; font-weight: 500; padding: 0.15rem 0.5rem;">${format}</span>
+                        </h4>
+                        <p style="font-size: 0.85rem; color: var(--text-secondary); margin: 0;">Date: ${d.date} • Booked for: ${d.doctorName}</p>
+                     </div>
+                     <a href="/room" data-link class="btn btn-primary" style="padding: 0.5rem 1rem; font-size: 0.85rem; min-width: 90px; text-align: center;">Start Call</a>
+                  </div>
+              `;
+           });
+           container.innerHTML = html;
+       }, (error) => {
+           container.innerHTML = '<p style="color: var(--danger);">Error in live sync: ' + error.message + '</p>';
        });
-       container.innerHTML = html;
      } catch (e) {
-       container.innerHTML = '<p style="color: var(--danger);">Error fetching database: ' + e.message + '</p>';
+       container.innerHTML = '<p style="color: var(--danger);">Error setting up database sync: ' + e.message + '</p>';
      }
   };
 

@@ -1,5 +1,5 @@
 import { auth, db } from '../firebase.js';
-import { collection, getDocs, addDoc } from 'firebase/firestore';
+import { collection, getDocs, addDoc, onSnapshot } from 'firebase/firestore';
 
 export const renderPatientDashboard = () => {
   // If no tab is set, default to overview
@@ -148,12 +148,16 @@ export const renderPatientDashboard = () => {
      `;
   };
 
-  const fetchDoctorsFromDatabase = async () => {
+  const fetchDoctorsFromDatabase = () => {
     const listContainer = document.getElementById('doctor-list-container');
     if(!listContainer) return;
 
+    if (window.unsubDoctors) {
+        window.unsubDoctors();
+    }
+
     try {
-      const querySnapshot = await getDocs(collection(db, 'doctors'));
+      window.unsubDoctors = onSnapshot(collection(db, 'doctors'), (querySnapshot) => {
       if (querySnapshot.empty) {
          listContainer.innerHTML = '<p style="color: var(--text-secondary);">No doctors currently registered in the database.</p>';
          return;
@@ -192,8 +196,11 @@ export const renderPatientDashboard = () => {
         `;
       });
       listContainer.innerHTML = htmlBlock;
+      }, (error) => {
+         listContainer.innerHTML = '<p style="color: var(--danger);">Error in live sync: ' + error.message + '</p>';
+      });
     } catch(e) {
-       listContainer.innerHTML = '<p style="color: var(--danger);">Error fetching from Firebase: ' + e.message + '</p>';
+       listContainer.innerHTML = '<p style="color: var(--danger);">Error setting up database sync: ' + e.message + '</p>';
     }
   };
 
