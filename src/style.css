@@ -333,29 +333,43 @@ h1, h2, h3, h4 {
   .nav-links { display: none; }
   .navbar { flex-wrap: wrap; gap: 1rem; justify-content: space-between; }
   
-  /* Convert explicit grid inline styles to column layouts */
-  main[style*="grid-template-columns: 1fr 1fr"],
-  div[style*="grid-template-columns: 2fr 1fr"],
-  div[style*="grid-template-columns: 300px 1fr"],
-  div[style*="grid-template-columns: repeat(3, 1fr)"],
-  div[style*="grid-template-columns: 1fr 1fr"] {
+  /* Robustly stack all inline column grids and multi-column forms */
+  [style*="display: grid"],
+  .dashboard-layout {
     display: flex !important;
     flex-direction: column !important;
     gap: 1.5rem !important;
   }
   
-  /* Convert explicitly flex'd inline forms to vertical */
+  /* Convert explicitly flex'd complex rows to vertical if needed */
   form[style*="display: flex; gap: 1rem; flex-wrap: wrap;"] {
     flex-direction: column !important;
     align-items: stretch !important;
   }
   
-  .input-glass { width: 100% !important; }
+  .input-glass { width: 100% !important; box-sizing: border-box; }
+  
+  /* Modal responsive fixes */
+  .modal-content {
+    width: 95% !important;
+    padding: 1.5rem !important;
+    margin: 1rem;
+    max-height: 90vh;
+    overflow-y: auto;
+  }
 
-  /* Dashboard Adjustments */
-  .dashboard-layout {
-    display: flex !important;
-    flex-direction: column !important;
+  /* Fix overflowing elements inside cards like table headers / buttons */
+  .glass-card {
+    padding: 1rem !important;
+    overflow-x: auto;
+  }
+  
+  /* Allow tables to scroll horizontally */
+  table {
+    display: block;
+    width: 100%;
+    overflow-x: auto;
+    white-space: nowrap;
   }
   
   .sidebar {
