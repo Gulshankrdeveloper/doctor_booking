@@ -58,76 +58,99 @@ export const renderRegisterDoctor = () => {
   };
 
   return `
-    <div class="container fade-in" style="display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; padding: 3rem 0;">
-      <a href="/" class="logo" data-link style="margin-bottom: 2rem;">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-gradient"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
-        NexHealth
-      </a>
-
-      <div class="glass-card" style="width: 100%; max-width: 600px;">
-        <h2 style="margin-bottom: 0.5rem; font-size: 1.8rem; text-align: center;">Doctor Partner Registration</h2>
-        <p style="color: var(--text-secondary); margin-bottom: 2rem; text-align: center;">Join the medical network. Please provide your secure portal credentials.</p>
-
-        <form style="display: flex; flex-direction: column; gap: 1.5rem;" onsubmit="event.preventDefault(); window.handleDoctorRegister();">
-          
-          <div style="padding-bottom: 1rem; border-bottom: 1px solid rgba(255,255,255,0.1);">
-             <h3 style="font-size: 1rem; margin-bottom: 1rem; color: var(--primary);">1. Login Credentials</h3>
-             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
-                <div class="input-group" style="margin: 0;">
-                  <label style="font-size: 0.9rem; color: var(--text-secondary);">Email</label>
-                  <input id="doc-email" type="email" class="input-glass" placeholder="doctor@clinic.com" required>
-                </div>
-                <div class="input-group" style="margin: 0;">
-                  <label style="font-size: 0.9rem; color: var(--text-secondary);">Password (Min 6 chars)</label>
-                  <input id="doc-pass" type="password" class="input-glass" placeholder="••••••••" required>
-                </div>
-             </div>
-          </div>
-
-          <div>
-             <h3 style="font-size: 1rem; margin-bottom: 1rem; color: var(--accent);">2. Public Directory Profile</h3>
-             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
-                <div class="input-group" style="margin: 0;">
-                  <label style="font-size: 0.9rem; color: var(--text-secondary);">Full Name</label>
-                  <input id="doc-name" type="text" class="input-glass" placeholder="Dr. First Last" required>
-                </div>
-                <div class="input-group" style="margin: 0;">
-                  <label style="font-size: 0.9rem; color: var(--text-secondary);">Specialization</label>
-                  <select id="doc-spec" class="input-glass" style="appearance: none; background-color: rgba(0,0,0,0.5);" required>
-                     <option value="" disabled selected>Select specialization...</option>
-                     <option>General Physician</option>
-                     <option>Cardiologist</option>
-                     <option>Pediatrician</option>
-                     <option>Orthopedic</option>
-                     <option>Dermatologist</option>
-                     <option>Gynecologist</option>
-                  </select>
-                </div>
-             </div>
-
-             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
-                <div class="input-group" style="margin: 0;">
-                  <label style="font-size: 0.9rem; color: var(--text-secondary);">Consultation Price (₹/hr)</label>
-                  <input id="doc-price" type="number" class="input-glass" placeholder="e.g., 500" required>
-                </div>
-                <div class="input-group" style="margin: 0;">
-                  <label style="font-size: 0.9rem; color: var(--text-secondary);">Available Timings</label>
-                  <input id="doc-time" type="text" class="input-glass" placeholder="e.g., 10:00 AM - 04:00 PM" required>
+    <div style="display: grid; grid-template-columns: 1fr 1.2fr; min-height: 100vh; width: 100vw; overflow: hidden;">
+      
+      <!-- HERO IMAGE / LEFT -->
+      <div style="position: relative; overflow: hidden; display: flex; flex-direction: column; justify-content: flex-end; padding: 4rem; min-height: 35vh;">
+         <img src="/dr-bg.png" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; z-index: 0;" alt="Modern Clinic Interior">
+         <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(to top, rgba(11,17,32,1) 0%, rgba(11,17,32,0.4) 40%, rgba(11,17,32,0.2) 100%); z-index: 1;"></div>
+         
+         <div style="position: relative; z-index: 2;" class="fade-in delay-200">
+           <div style="display: flex; gap: 1rem; align-items: center; margin-bottom: 1.5rem;">
+               <div style="padding: 0.8rem; background: rgba(59, 130, 246, 0.2); border-radius: 16px; border: 1px solid rgba(59, 130, 246, 0.4);">
+                  <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
                </div>
-             </div>
+               <h1 style="font-size: 2rem; color: white; margin: 0; font-weight: 700;">NexHealth <span style="font-weight: 300; color: var(--text-secondary);">Partners</span></h1>
+           </div>
+           <h1 style="font-size: 3.5rem; margin-bottom: 1rem; color: white; line-height: 1.15;">
+             Practice Medicine, <br><span class="text-gradient">reimagined.</span>
+           </h1>
+           <p style="font-size: 1.2rem; color: rgba(255,255,255,0.8); max-width: 450px;">
+             Grow your practice, consult via high-definition video, and manage your private schedule locally in Jharkhand securely.
+           </p>
+         </div>
+      </div>
 
-             <div class="input-group" style="margin: 0;">
-               <label style="font-size: 0.9rem; color: var(--text-secondary);">Clinic Address / Location</label>
-               <input id="doc-loc" type="text" class="input-glass" placeholder="e.g., Annanda Chowk, Hazaribagh, Jharkhand 825301" required>
-             </div>
-          </div>
-
-          <button id="doc-reg-btn" type="submit" class="btn btn-primary" style="margin-top: 1rem; width: 100%;">Create Doctor Profile</button>
+      <!-- AUTH FORM / RIGHT -->
+      <div style="display: flex; flex-direction: column; align-items: center; padding: 3rem 2rem; background: var(--bg-color); overflow-y: auto; max-height: 100vh;">
+        
+        <div class="glass-card fade-in delay-300" style="width: 100%; max-width: 550px; padding: 2.5rem; background: rgba(30, 41, 59, 0.5); border: 1px solid rgba(255,255,255,0.05); box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5);">
           
-          <div style="text-align: center; margin-top: 1rem;">
-             <a href="/login" class="text-gradient" style="text-decoration: none; font-size: 0.9rem; font-weight: 500;" data-link>Already registered? Log In</a>
-          </div>
-        </form>
+          <h2 style="margin-bottom: 0.5rem; font-size: 1.8rem; text-align: center;">Doctor Partner Registration</h2>
+          <p style="color: var(--text-secondary); margin-bottom: 2.5rem; text-align: center; font-size: 0.9rem;">Join the elite medical network. Please configure your secure public directory profile.</p>
+
+          <form style="display: flex; flex-direction: column; gap: 1.5rem;" onsubmit="event.preventDefault(); window.handleDoctorRegister();">
+            
+            <div style="padding-bottom: 1.5rem; border-bottom: 1px solid rgba(255,255,255,0.1);">
+               <h3 style="font-size: 0.95rem; margin-bottom: 1rem; color: var(--primary); text-transform: uppercase; letter-spacing: 1px;">1. Login Credentials</h3>
+               <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem;">
+                  <div class="input-group" style="margin: 0;">
+                    <label style="font-size: 0.85rem; color: var(--text-secondary);">Email</label>
+                    <input id="doc-email" type="email" class="input-glass" placeholder="doctor@clinic.com" required>
+                  </div>
+                  <div class="input-group" style="margin: 0;">
+                    <label style="font-size: 0.85rem; color: var(--text-secondary);">Secure Password (Min 6 chars)</label>
+                    <input id="doc-pass" type="password" class="input-glass" placeholder="••••••••" required>
+                  </div>
+               </div>
+            </div>
+
+            <div style="margin-top: 0.5rem;">
+               <h3 style="font-size: 0.95rem; margin-bottom: 1rem; color: var(--accent); text-transform: uppercase; letter-spacing: 1px;">2. Public Directory Profile</h3>
+               
+               <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; margin-bottom: 1.25rem;">
+                  <div class="input-group" style="margin: 0;">
+                    <label style="font-size: 0.85rem; color: var(--text-secondary);">Full Name</label>
+                    <input id="doc-name" type="text" class="input-glass" placeholder="Dr. First Last" required>
+                  </div>
+                  <div class="input-group" style="margin: 0;">
+                    <label style="font-size: 0.85rem; color: var(--text-secondary);">Specialization</label>
+                    <select id="doc-spec" class="input-glass" style="appearance: none; background-color: rgba(0,0,0,0.5);" required>
+                       <option value="" disabled selected>Select specialization...</option>
+                       <option>General Physician</option>
+                       <option>Cardiologist</option>
+                       <option>Pediatrician</option>
+                       <option>Orthopedic</option>
+                       <option>Dermatologist</option>
+                       <option>Gynecologist</option>
+                    </select>
+                  </div>
+               </div>
+
+               <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; margin-bottom: 1.25rem;">
+                  <div class="input-group" style="margin: 0;">
+                    <label style="font-size: 0.85rem; color: var(--text-secondary);">Consultation Price (₹/hr)</label>
+                    <input id="doc-price" type="number" class="input-glass" placeholder="e.g., 500" required>
+                  </div>
+                  <div class="input-group" style="margin: 0;">
+                    <label style="font-size: 0.85rem; color: var(--text-secondary);">Available Timings</label>
+                    <input id="doc-time" type="text" class="input-glass" placeholder="e.g., 10:00 AM - 04:00 PM" required>
+                 </div>
+               </div>
+
+               <div class="input-group" style="margin: 0;">
+                 <label style="font-size: 0.85rem; color: var(--text-secondary);">Clinic Address / Location</label>
+                 <input id="doc-loc" type="text" class="input-glass" placeholder="e.g., Annanda Chowk, Hazaribagh, Jharkhand 825301" required>
+               </div>
+            </div>
+
+            <button id="doc-reg-btn" type="submit" class="btn btn-primary" style="margin-top: 1rem; width: 100%; padding: 0.85rem; font-size: 1rem;">Create Doctor Profile</button>
+            
+            <div style="text-align: center; margin-top: 1rem;">
+               <a href="/login" class="text-gradient" style="text-decoration: none; font-size: 0.9rem; font-weight: 500;" data-link>Already registered? Log In</a>
+            </div>
+          </form>
+        </div>
       </div>
     </div>
   `;
