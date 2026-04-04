@@ -63,23 +63,16 @@ const router = () => {
     </div>
     ${renderFunction()}
   `
-  
-  // Attach event listeners after rendering
-  attachGlobalEvents()
 }
 
-const attachGlobalEvents = () => {
-  document.querySelectorAll('[data-link]').forEach(link => {
-    // skip elements that already have a listener attached
-    if (link.dataset.hasListener) return;
-    
-    link.addEventListener('click', e => {
-      e.preventDefault()
-      navigateTo(e.currentTarget.getAttribute('href'))
-    });
-    link.dataset.hasListener = "true";
-  })
-}
+// Global click delegation for fast SPA routing
+document.body.addEventListener('click', e => {
+  const link = e.target.closest('[data-link]');
+  if (link) {
+    e.preventDefault();
+    navigateTo(link.getAttribute('href'));
+  }
+});
 
 // Handle browser back/forward arrows
 window.addEventListener('popstate', router)
