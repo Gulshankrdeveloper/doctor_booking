@@ -4,63 +4,8 @@ export const renderRoom = () => {
   const role = localStorage.getItem('nexhealth_role') || 'patient';
   const isDoctor = role === 'doctor';
   
-  // Real-time Video Call Initialization via Jitsi Meet
-  window.initVideoCall = () => {
-     const container = document.getElementById('video-container');
-     if(!container) return;
-     
-     const domain = 'meet.jit.si';
-     const options = {
-         roomName: 'NexHealth-Hazaribagh-Consultation-Secure-9988',
-         width: '100%',
-         height: '100%',
-         parentNode: container,
-         userInfo: {
-             displayName: isDoctor ? 'Doctor (NexHealth Partner)' : 'Patient (NexHealth)'
-         },
-         configOverwrite: {
-             prejoinPageEnabled: false,
-             disableDeepLinking: true,
-             startWithAudioMuted: false,
-             startWithVideoMuted: false
-         },
-         interfaceConfigOverwrite: {
-             SHOW_CHROME_EXTENSION_BANNER: false
-         }
-     };
-     
-     // Remove placeholder and mount
-     document.getElementById('video-placeholder').style.display = 'none';
-     const api = new window.JitsiMeetExternalAPI(domain, options);
-     
-     // Handle ending the call
-     api.addEventListener('videoConferenceLeft', () => {
-         api.dispose();
-         window.history.back();
-     });
-     
-     window.currentVideoCallApi = api;
-  };
-
-  // Mount script dynamically
-  setTimeout(() => {
-     if(window.JitsiMeetExternalAPI) {
-         window.initVideoCall();
-     } else {
-         const script = document.createElement('script');
-         script.src = 'https://meet.jit.si/external_api.js';
-         script.async = true;
-         script.onload = window.initVideoCall;
-         document.head.appendChild(script);
-     }
-  }, 150);
-
   // Cleanup logic
   window.leaveCall = () => {
-     if(window.currentVideoCallApi) {
-        window.currentVideoCallApi.dispose();
-        window.currentVideoCallApi = null;
-     }
      window.history.back();
   };
   
@@ -88,12 +33,12 @@ export const renderRoom = () => {
     <div style="flex: 1; max-width: 350px; background: rgba(0,0,0,0.3); border-left: var(--border-glass); padding: 1.5rem; display: flex; flex-direction: column;">
        <h3 style="margin-bottom: 1rem; font-size: 1.2rem; display: flex; align-items: center; gap: 0.5rem;">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
-          Live Connection
+          Live P2P Connection
        </h3>
        <div style="flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; color: var(--text-secondary); text-align: center;">
           <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" style="margin-bottom: 1rem; opacity: 0.5;"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
           <p style="font-size: 0.9rem;">You are in a secure, end-to-end encrypted session.</p>
-          <p style="font-size: 0.8rem; margin-top: 0.5rem;">Use the video controls to chat, share screen, or toggle your devices.</p>
+          <p style="font-size: 0.8rem; margin-top: 0.5rem;">There are no time limits on your consultation.</p>
        </div>
     </div>
   `;
@@ -112,13 +57,13 @@ export const renderRoom = () => {
        <!-- Main Workspace -->
        <div style="flex: 1; display: flex; overflow: hidden;">
           
-          <!-- WebRTC Video Area Container -->
+          <!-- WebRTC Video Area Container (MiroTalk P2P Unlimited) -->
           <div id="video-container" style="flex: 2; position: relative; background: #111; overflow: hidden;">
-             <!-- Placeholder while Jitsi mounts -->
-             <div id="video-placeholder" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center; color: var(--text-secondary);">
-                 <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2" style="animation: pulse 2s infinite; margin-bottom: 1rem;"><polygon points="23 7 16 12 23 17 23 7"></polygon><rect x="1" y="5" width="15" height="14" rx="2" ry="2"></rect></svg>
-                 <p>Establishing encrypted video link...</p>
-             </div>
+             <iframe 
+                allow="camera; microphone; display-capture; autoplay; clipboard-write; fullscreen" 
+                src="https://p2p.mirotalk.com/join/NexHealthHazaribaghRoom9988?name=${isDoctor ? 'Doctor' : 'Patient'}" 
+                style="width: 100%; height: 100%; border: 0; position: absolute; top: 0; left: 0;">
+             </iframe>
           </div>
           
           <!-- Auxiliary Side Panel -->
