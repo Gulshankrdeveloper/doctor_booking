@@ -115,6 +115,7 @@ h1, h2, h3, h4 {
 
 .text-gradient {
   background: linear-gradient(to right, #60a5fa, #3b82f6);
+  background-clip: text;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
@@ -258,6 +259,28 @@ h1, h2, h3, h4 {
   position: relative;
 }
 
+/* Room Layout */
+.room-workspace {
+  flex: 1;
+  display: flex;
+  overflow: hidden;
+}
+.room-video {
+  flex: 2;
+  position: relative;
+  background: #111;
+  overflow: hidden;
+}
+.room-sidepanel {
+  flex: 1;
+  max-width: 350px;
+  background: rgba(0,0,0,0.3);
+  border-left: var(--border-glass);
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+}
+
 /* Modal */
 .modal-overlay {
   position: fixed;
@@ -398,5 +421,22 @@ h1, h2, h3, h4 {
   /* Fix tight header margins */
   .hero-content {
     padding-top: 1rem;
+  }
+  
+  /* Room mobile stacking */
+  .room-workspace {
+    flex-direction: column !important;
+    overflow-y: auto !important;
+  }
+  .room-video {
+    flex: none !important;
+    min-height: 50vh !important;
+    width: 100% !important;
+  }
+  .room-sidepanel {
+    max-width: 100% !important;
+    border-left: none !important;
+    border-top: var(--border-glass) !important;
+    flex: none !important;
   }
 }
