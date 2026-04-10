@@ -357,6 +357,15 @@ export const renderPatientDashboard = () => {
 const renderPatientContent = () => {
   const tab = window.currentPatientTab;
 
+  // Immediate fetch if rendering specifically on mount
+  if (tab === 'overview') {
+     setTimeout(() => window.fetchPatientAppointments(), 10);
+  } else if (tab === 'records') {
+     setTimeout(() => window.fetchPatientRecords(), 10);
+  } else if (tab === 'find') {
+     setTimeout(() => window.fetchDoctorsFromDatabase(), 10);
+  }
+
   if (tab === 'overview') {
     return `
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2.5rem;">
