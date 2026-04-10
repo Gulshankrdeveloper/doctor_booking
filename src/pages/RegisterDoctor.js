@@ -47,11 +47,11 @@ export const renderRegisterDoctor = () => {
        });
        
        localStorage.setItem('nexhealth_role', 'doctor');
-       alert('Doctor Profile Successfully Registered in NexHealth Database!');
+       window.showToast('Doctor Profile Successfully Registered in NexHealth Database!', 'success');
        navigateTo('/doctor');
 
      } catch(e) {
-       alert("Error Registering: " + e.message);
+       window.showToast("Error Registering: " + e.message, 'error');
        btn.innerText = "Create Doctor Profile";
        btn.disabled = false;
      }

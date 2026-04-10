@@ -1,4 +1,6 @@
 import { fakeAuth } from '../auth.js';
+import { db } from '../firebase.js';
+import { collection, addDoc } from 'firebase/firestore';
 
 export const renderRoom = () => {
   const role = localStorage.getItem('nexhealth_role') || 'patient';
@@ -9,6 +11,35 @@ export const renderRoom = () => {
      window.history.back();
   };
   
+  // Provide prescription saving utility 
+  window.generatePrescription = async () => {
+     const complaint = document.getElementById('rx-complaint').value;
+     const notes = document.getElementById('rx-notes').value;
+     const pEmail = localStorage.getItem('current_patient_email') || 'patient@example.com';
+     const pName = localStorage.getItem('current_patient_name') || 'Patient';
+     
+     if (!notes.trim()) {
+         window.showToast('Please write some clinical notes before saving.', 'error');
+         return;
+     }
+
+     try {
+         await addDoc(collection(db, 'prescriptions'), {
+            patientEmail: pEmail,
+            patientName: pName,
+            doctorEmail: localStorage.getItem('nexhealth_email'),
+            doctorName: localStorage.getItem('nexhealth_name') || 'Your Doctor',
+            complaint: complaint,
+            notes: notes,
+            date: new Date().toLocaleDateString()
+         });
+         window.showToast('Prescription generated and securely saved to patient record!', 'success');
+         document.getElementById('rx-notes').value = '';
+     } catch (e) {
+         window.showToast('Error saving prescription: ' + e.message, 'error');
+     }
+  };
+
   // The doctor sees a notes/prescription panel on the right. The patient sees chat.
   const sidePanel = isDoctor ? `
     <div class="room-sidepanel">
@@ -19,15 +50,15 @@ export const renderRoom = () => {
        
        <div class="input-group">
           <label style="font-size: 0.85rem; color: var(--text-secondary);">Chief Complaint</label>
-          <input type="text" class="input-glass" value="Extracted from booking...">
+          <input id="rx-complaint" type="text" class="input-glass" value="Extracted from booking...">
        </div>
        
        <div class="input-group" style="flex: 1;">
           <label style="font-size: 0.85rem; color: var(--text-secondary);">Clinical Notes</label>
-          <textarea class="input-glass" style="height: 100%; resize: none;" placeholder="Start typing notes here..."></textarea>
+          <textarea id="rx-notes" class="input-glass" style="height: 100%; resize: none;" placeholder="Start typing notes here..."></textarea>
        </div>
        
-       <button class="btn btn-primary" style="margin-top: 1rem; width: 100%;" onclick="alert('Prescription created and sent to the patient database!')">Generate Prescription</button>
+       <button class="btn btn-primary" style="margin-top: 1rem; width: 100%;" onclick="window.generatePrescription()">Generate Prescription</button>
     </div>
   ` : `
     <div class="room-sidepanel">

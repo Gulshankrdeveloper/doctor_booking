@@ -26,8 +26,14 @@ export const renderPatientDashboard = () => {
       });
       
       // Async trigger for database listings
+      if (tab === 'overview') {
+         setTimeout(() => window.fetchPatientAppointments(), 0);
+      }
       if (tab === 'find') {
          fetchDoctorsFromDatabase();
+      }
+      if (tab === 'records') {
+         setTimeout(() => window.fetchPatientRecords(), 0);
       }
     }
   };
@@ -94,11 +100,11 @@ export const renderPatientDashboard = () => {
             location: loc,
             status: 'pending'
          });
-         alert('Appointment Successfully Booked in Database!');
+         window.showToast('Appointment Successfully Booked in Database!', 'success');
          window.closeBookingModal();
          window.setPatientTab('overview');
       } catch(err) {
-         alert('Error Booking: ' + err.message);
+         window.showToast('Error Booking: ' + err.message, 'error');
       } finally {
          btn.innerText = "Confirm Booking";
          btn.disabled = false;
@@ -146,6 +152,49 @@ export const renderPatientDashboard = () => {
         </div>
       </div>
      `;
+  };
+
+  window.fetchPatientRecords = () => {
+    const listContainer = document.getElementById('patient-records-list');
+    if(!listContainer) return;
+
+    if (window.unsubRecords) window.unsubRecords();
+
+    try {
+      const email = localStorage.getItem('nexhealth_email');
+      const q = query(collection(db, 'prescriptions'), where("patientEmail", "==", email));
+      window.unsubRecords = onSnapshot(q, (querySnapshot) => {
+          if (querySnapshot.empty) {
+             listContainer.innerHTML = '<p style="color: var(--text-secondary);">No medical records or prescriptions found.</p>';
+             return;
+          }
+
+          let htmlBlock = '';
+          querySnapshot.forEach((docSnap) => {
+            const d = docSnap.data();
+            htmlBlock += `
+               <div class="glass-card" style="margin-bottom: 1rem; display: flex; justify-content: space-between; align-items: center;">
+                 <div style="display: flex; gap: 1rem; align-items: center;">
+                     <div style="padding: 0.8rem; background: rgba(16, 185, 129, 0.2); border-radius: var(--radius-sm); color: var(--accent);">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+                     </div>
+                     <div>
+                         <h4 style="margin-bottom: 0.2rem;">Digital Prescription</h4>
+                         <p style="color: var(--text-secondary); font-size: 0.8rem; margin: 0;">Issued by ${d.doctorName} • ${d.date}</p>
+                         <p style="color: var(--text-primary); font-size: 0.85rem; margin-top: 0.5rem; white-space: pre-line;"><strong>Rx:</strong> ${d.notes}</p>
+                     </div>
+                 </div>
+                 <button class="btn btn-outline" onclick="window.showToast('Generating secure PDF...', 'info')">Download PDF</button>
+               </div>
+            `;
+          });
+          listContainer.innerHTML = htmlBlock;
+      }, (error) => {
+         listContainer.innerHTML = '<p style="color: var(--danger);">Error loading records: ' + error.message + '</p>';
+      });
+    } catch(e) {
+      console.error(e);
+    }
   };
 
   const fetchDoctorsFromDatabase = () => {
@@ -217,6 +266,86 @@ export const renderPatientDashboard = () => {
   `;
 };
 
+  window.fetchPatientAppointments = () => {
+    const listContainer = document.getElementById('patient-appointments-list');
+    if(!listContainer) return;
+
+    if (window.unsubPatAppointments) window.unsubPatAppointments();
+
+    try {
+      const uid = auth.currentUser ? auth.currentUser.uid : 'anonymous';
+      const q = query(collection(db, 'appointments'), where("patientId", "==", uid));
+      window.unsubPatAppointments = onSnapshot(q, (querySnapshot) => {
+          if (querySnapshot.empty) {
+             listContainer.innerHTML = '<p style="color: var(--text-secondary);">No upcoming appointments scheduled.</p>';
+             return;
+          }
+
+          let htmlBlock = '';
+          querySnapshot.forEach((docSnap) => {
+            const d = docSnap.data();
+            const isOnline = d.location === 'online';
+            const badgeColor = isOnline ? 'badge-info' : 'badge-success';
+            const formatStr = isOnline ? 'Online Video' : 'In-Person Clinic';
+            const clinicLocation = isOnline ? '' : d.location || '123 Healthway Medical Plaza';
+            
+            // Dynamic Embed Google Maps URL logic based on location string
+            const safeLocationQuery = encodeURIComponent(clinicLocation);
+            
+            htmlBlock += `
+              <div class="glass-card" style="margin-bottom: 1rem; position: relative; overflow: hidden; ${!isOnline ? 'padding-bottom: 1rem;' : ''}">
+                <div style="position: absolute; top: 0; left: 0; width: 4px; height: 100%; background: ${isOnline ? 'var(--primary)' : 'var(--accent)'};"></div>
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; ${!isOnline ? 'margin-bottom: 1rem;' : ''}">
+                  <div style="display: flex; gap: 1rem;">
+                    <div style="width: 50px; height: 50px; border-radius: 10px; overflow: hidden; border: 2px solid rgba(255,255,255,0.2); box-shadow: 0 0 15px rgba(59,130,246,0.3); flex-shrink: 0;">
+                      <img src="/doc3.png" style="width: 100%; height: 100%; object-fit: cover; object-position: top;" alt="Doctor Portrait">
+                    </div>
+                    <div>
+                      <h4 style="font-size: 1.1rem; margin-bottom: 0.25rem;">${d.doctorName}</h4>
+                      <p style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 0.5rem;">
+                         <span class="badge ${badgeColor}" style="margin-right: 0.5rem; font-size: 0.7rem;">${formatStr}</span> For: ${d.reason}
+                      </p>
+                      <div style="display: flex; gap: 1rem; font-size: 0.85rem; ${!isOnline ? 'margin-bottom: 0.5rem;' : ''}">
+                        <span style="display: flex; align-items: center; gap: 0.25rem; color: var(--text-primary);">
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="${isOnline ? 'var(--primary)' : 'var(--accent)'}" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg> 
+                          ${d.date}, ${d.time}
+                        </span>
+                      </div>
+                      ${!isOnline ? `
+                      <div style="font-size: 0.8rem; color: var(--text-secondary); display: flex; align-items: center; gap: 0.25rem;">
+                         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+                         ${clinicLocation}
+                      </div>
+                      ` : ''}
+                    </div>
+                  </div>
+                  ${isOnline ? `
+                     <a href="/room" data-link class="btn btn-primary" style="padding: 0.5rem 1rem; font-size: 0.9rem;">Join Call</a>
+                  ` : `
+                    <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+                       <a href="https://www.google.com/maps/dir/?api=1&destination=${safeLocationQuery}" target="_blank" class="btn btn-primary" style="padding: 0.4rem 1rem; font-size: 0.8rem;">Real Directions</a>
+                       <button class="btn btn-outline" style="padding: 0.4rem 1rem; font-size: 0.8rem;">Reschedule</button>
+                    </div>
+                  `}
+                </div>
+                
+                ${!isOnline ? `
+                <div style="border-radius: var(--radius-sm); overflow: hidden; border: 1px solid rgba(255,255,255,0.1); height: 150px; background: #222;">
+                    <iframe width="100%" height="100%" src="https://maps.google.com/maps?width=100%25&amp;height=100%25&amp;hl=en&amp;q=${safeLocationQuery}&amp;t=&amp;z=14&amp;ie=UTF8&amp;iwloc=B&amp;output=embed" frameborder="0" scrolling="no" marginheight="0" marginwidth="0"></iframe>
+                </div>
+                ` : ''}
+              </div>
+            `;
+          });
+          listContainer.innerHTML = htmlBlock;
+      }, (error) => {
+         listContainer.innerHTML = '<p style="color: var(--danger);">Error loading appointments: ' + error.message + '</p>';
+      });
+    } catch(e) {
+      console.error(e);
+    }
+  };
+
 const renderPatientContent = () => {
   const tab = window.currentPatientTab;
 
@@ -244,55 +373,8 @@ const renderPatientContent = () => {
             <a href="#" onclick="event.preventDefault(); window.setPatientTab('records')" style="color: var(--primary); font-size: 0.9rem; text-decoration: none;">View All</a>
           </div>
           
-          <!-- Online Appointment -->
-          <div class="glass-card" style="margin-bottom: 1rem; position: relative; overflow: hidden;">
-            <div style="position: absolute; top: 0; left: 0; width: 4px; height: 100%; background: var(--primary);"></div>
-            <div style="display: flex; justify-content: space-between; align-items: flex-start;">
-              <div style="display: flex; gap: 1rem;">
-                   <div style="width: 50px; height: 50px; border-radius: 10px; overflow: hidden; border: 2px solid rgba(255,255,255,0.2); box-shadow: 0 0 15px rgba(59,130,246,0.3); flex-shrink: 0;">
-                      <img src="/doc3.png" style="width: 100%; height: 100%; object-fit: cover; object-position: top;" alt="Doctor Portrait">
-                   </div>
-                <div>
-                  <h4 style="font-size: 1.1rem; margin-bottom: 0.25rem;">Dr. Sarah Jenkins</h4>
-                  <p style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 0.5rem;"><span class="badge badge-info" style="margin-right: 0.5rem; font-size: 0.7rem;">Online Video</span> Cardiologist</p>
-                  <div style="display: flex; gap: 1rem; font-size: 0.85rem;">
-                    <span style="display: flex; align-items: center; gap: 0.25rem; color: var(--text-primary);"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg> Tomorrow, 10:00 AM</span>
-                  </div>
-                </div>
-              </div>
-              <a href="/room" data-link class="btn btn-primary" style="padding: 0.5rem 1rem; font-size: 0.9rem;">Join Call</a>
-            </div>
-          </div>
-          
-          <!-- Offline Appointment with Map -->
-          <div class="glass-card" style="position: relative; overflow: hidden; padding-bottom: 1rem;">
-            <div style="position: absolute; top: 0; left: 0; width: 4px; height: 100%; background: var(--accent);"></div>
-            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem;">
-               <div style="display: flex; gap: 1rem;">
-                   <div style="width: 50px; height: 50px; border-radius: 10px; overflow: hidden; border: 2px solid rgba(255,255,255,0.2); box-shadow: 0 0 15px rgba(59,130,246,0.3); flex-shrink: 0;">
-                      <img src="/doc2.png" style="width: 100%; height: 100%; object-fit: cover; object-position: top;" alt="Doctor Portrait">
-                   </div>
-                   <div>
-                  <h4 style="font-size: 1.1rem; margin-bottom: 0.25rem;">Dr. Emily Chen</h4>
-                  <p style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 0.5rem;"><span class="badge badge-success" style="margin-right: 0.5rem; font-size: 0.7rem;">In-Person Clinic</span> Dermatologist</p>
-                  <div style="display: flex; gap: 1rem; font-size: 0.85rem; margin-bottom: 0.5rem;">
-                    <span style="display: flex; align-items: center; gap: 0.25rem; color: var(--text-primary);"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg> Oct 15, 2:30 PM</span>
-                  </div>
-                  <div style="font-size: 0.8rem; color: var(--text-secondary); display: flex; align-items: center; gap: 0.25rem;">
-                     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
-                     123 Healthway Medical Plaza
-                  </div>
-                </div>
-              </div>
-              <div style="display: flex; flex-direction: column; gap: 0.5rem;">
-                 <a href="https://www.google.com/maps/dir/?api=1&destination=123+Healthway+Medical+Plaza" target="_blank" class="btn btn-primary" style="padding: 0.4rem 1rem; font-size: 0.8rem;">Real Directions</a>
-                 <button class="btn btn-outline" style="padding: 0.4rem 1rem; font-size: 0.8rem;">Reschedule</button>
-              </div>
-            </div>
-
-            <div style="border-radius: var(--radius-sm); overflow: hidden; border: 1px solid rgba(255,255,255,0.1); height: 150px; background: #222;">
-                <iframe width="100%" height="100%" src="https://maps.google.com/maps?width=100%25&amp;height=100%25&amp;hl=en&amp;q=123%20Healthway%20Medical%20Plaza&amp;t=&amp;z=14&amp;ie=UTF8&amp;iwloc=B&amp;output=embed" frameborder="0" scrolling="no" marginheight="0" marginwidth="0"></iframe>
-            </div>
+          <div id="patient-appointments-list">
+            <p style="color: var(--text-secondary);">Loading your live appointments database...</p>
           </div>
         </div>
 
@@ -422,30 +504,8 @@ const renderPatientContent = () => {
       <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 2rem;">
          <div>
              <h3 style="margin-bottom: 1rem;">Recent Files</h3>
-             <div class="glass-card" style="margin-bottom: 1rem; display: flex; justify-content: space-between; align-items: center;">
-                 <div style="display: flex; gap: 1rem; align-items: center;">
-                     <div style="padding: 0.8rem; background: rgba(59, 130, 246, 0.2); border-radius: var(--radius-sm); color: var(--primary);">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
-                     </div>
-                     <div>
-                         <h4 style="margin-bottom: 0.2rem;">Lisinopril Prescription (PDF)</h4>
-                         <p style="color: var(--text-secondary); font-size: 0.8rem; margin: 0;">Issued by Dr. Sarah Jenkins • Oct 10, 2026</p>
-                     </div>
-                 </div>
-                 <button class="btn btn-outline" onclick="alert('Downloading...')">Download</button>
-             </div>
-
-             <div class="glass-card" style="display: flex; justify-content: space-between; align-items: center;">
-                 <div style="display: flex; gap: 1rem; align-items: center;">
-                     <div style="padding: 0.8rem; background: rgba(16, 185, 129, 0.2); border-radius: var(--radius-sm); color: var(--accent);">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="12" y1="18" x2="12" y2="12"></line><line x1="9" y1="15" x2="15" y2="15"></line></svg>
-                     </div>
-                     <div>
-                         <h4 style="margin-bottom: 0.2rem;">Annual Bloodwork Report</h4>
-                         <p style="color: var(--text-secondary); font-size: 0.8rem; margin: 0;">Quest Diagnostics • Sep 15, 2026</p>
-                     </div>
-                 </div>
-                 <button class="btn btn-outline" onclick="alert('Downloading...')">Download</button>
+             <div id="patient-records-list">
+                <p style="color: var(--text-secondary);">Loading secure records...</p>
              </div>
          </div>
 
@@ -469,7 +529,7 @@ const renderPatientContent = () => {
       </div>
 
       <div class="glass-card" style="max-width: 600px;">
-         <form onsubmit="event.preventDefault(); alert('Settings saved!')">
+         <form onsubmit="event.preventDefault(); window.showToast('Settings saved!', 'success');">
             <h3 style="margin-bottom: 1.5rem;">Personal Information</h3>
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.5rem;">
                <div class="input-group">

@@ -111,7 +111,7 @@ const renderDoctorContent = () => {
                         </h4>
                         <p style="font-size: 0.85rem; color: var(--text-secondary); margin: 0;">Date: ${d.date} • Booked for: ${d.doctorName}</p>
                      </div>
-                     <a href="/room" data-link class="btn btn-primary" style="padding: 0.5rem 1rem; font-size: 0.85rem; min-width: 90px; text-align: center;">Start Call</a>
+                     <a href="/room" data-link class="btn btn-primary" onclick="localStorage.setItem('current_patient_email', '${d.patientEmail}'); localStorage.setItem('current_patient_name', '${d.patientName}')" style="padding: 0.5rem 1rem; font-size: 0.85rem; min-width: 90px; text-align: center;">Start Call</a>
                   </div>
               `;
            });
