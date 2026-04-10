@@ -1,5 +1,5 @@
 import { auth, db } from '../firebase.js';
-import { collection, getDocs, addDoc, onSnapshot } from 'firebase/firestore';
+import { collection, getDocs, addDoc, onSnapshot, query, where } from 'firebase/firestore';
 
 export const renderPatientDashboard = () => {
   // If no tab is set, default to overview
