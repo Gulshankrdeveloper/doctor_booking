@@ -38,8 +38,14 @@ export const renderPatientDashboard = () => {
     }
   };
 
-  window.openBookingModal = (doctorName) => {
+  window.openBookingModal = (doctorName, doctorLocation) => {
       document.getElementById('booking-doctor-name').innerText = doctorName;
+      const offlineOpt = document.getElementById('book-offline-opt');
+      if (offlineOpt) {
+          const locStr = doctorLocation || 'In-Person Clinic';
+          offlineOpt.value = locStr;
+          offlineOpt.innerText = `In-Person (${locStr})`;
+      }
       document.getElementById('booking-modal').classList.add('active');
   };
 
@@ -93,6 +99,8 @@ export const renderPatientDashboard = () => {
       try {
          await addDoc(collection(db, 'appointments'), {
             patientId: auth.currentUser ? auth.currentUser.uid : 'anonymous',
+            patientEmail: localStorage.getItem('nexhealth_email') || 'patient@example.com',
+            patientName: localStorage.getItem('nexhealth_name') || 'Patient',
             doctorName: docName,
             reason: reason,
             date: date,
@@ -143,7 +151,7 @@ export const renderPatientDashboard = () => {
                <select id="book-loc" class="input-glass" style="appearance: none; background-color: rgba(0,0,0,0.5);" required>
                   <option value="" disabled selected>Select an option...</option>
                   <option value="online">Online Video Consultation</option>
-                  <option value="downtown">Offline - Downtown Clinic</option>
+                  <option id="book-offline-opt" value="downtown">Offline - Downtown Clinic</option>
                </select>
             </div>
 
@@ -238,7 +246,7 @@ export const renderPatientDashboard = () => {
                         <span style="font-size: 0.85rem; display: flex; align-items: center; gap: 0.3rem; color: var(--text-secondary);"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg> ${d.timings}</span>
                         <span style="font-size: 0.85rem; display: flex; align-items: center; gap: 0.3rem; color: var(--text-secondary);"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg> ${d.location}</span>
                     </div>
-                    <button class="btn btn-primary" onclick="window.openBookingModal('${d.name}')">Select & Book</button>
+                    <button class="btn btn-primary" onclick="window.openBookingModal('${d.name}', '${d.location || ''}')">Select & Book</button>
                  </div>
              </div>
           </div>
